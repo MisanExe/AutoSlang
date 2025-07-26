@@ -7,6 +7,7 @@ CFILES += src/uart.c
 CFILES += src/buffer.c
 CFILES += src/rtc.c
 CFILES += src/logger.c
+CFILES += src/spi.c
 #AFILES += api-asm.S
 
 # TODO - you will need to edit these two lines!
