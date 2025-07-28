@@ -18,53 +18,66 @@ int main(void)
 	
 	rcc_periph_clock_enable(RCC_GPIOA);
 
-	gpio_set_mode(GPIOA,
+	gpio_set_mode(GPIOB,
 	GPIO_MODE_OUTPUT_10_MHZ,
 	GPIO_CNF_OUTPUT_PUSHPULL,
 	GPIO7
 	);
+
 	uart_handle_t uart2_handle;
 	UART_init(USART2, &uart2_handle);
 
-	Rtc_init(0);
-	Logger_init();
-	Logger_log(INFO,"Initalized spi");
-	//Spi_init();
-
-	gpio_set(GPIOA, GPIO7);
-
-
-	uint32_t previous = Rtc_getTime();
+	int state = 0;
+	int address = 0;
 	while(1)
 	{
-		// for(int i = 0; i <1000000; i++)
-		// {
-		// 	__asm__("nop");
-		// }
-		
-		//read using spi
-		// uint8_t address = 0x55;
-		// address |= (1U<<7);
-		// spi_write(SPI1, address);
-		uint8_t read = spi_read(SPI1);
-		
-		if( (Rtc_getTime() - previous) % 60 > 1 )
+		char msg[250];
+		memset(msg, '\0', sizeof(msg));
+		for(int i = 0; i <1000000; i++)
 		{
-			echo(&uart2_handle);
-
-			char msg[100];
-			if(read != 0)
-			{
-				//sprintf(msg, "Read from address %d: %d",address, read);
-				UART_println(&uart2_handle, "Read ");
-			}
-
-			// update 
-			previous = Rtc_getTime();
-			read = 0;
-			Logger_log(INFO,"End of main routine");
-			
+			__asm__("nop");
 		}
+
+		uint8_t buffer = 0;
+		buffer = UART_read(&uart2_handle);
+		if(buffer == '\r')
+		{
+			gpio_toggle(GPIOB, GPIO7);	
+		}
+
+		// switch(state)
+		// {
+		// 	case 0:
+		// 		UART_println(&uart2_handle, "Enter command. e.g READ=<address> ");
+		// 		UART_writeBytes(&uart2_handle, "COMMAND : ");
+		// 		state = 1;
+		// 		break;
+		// 	case 1: // waiting to read spi from here
+		// 		UART_readRecvData(&uart2_handle, msg);
+
+		// 		sscanf(msg, "READ=%x", &address);
+		// 		if(address > 0)
+		// 		{
+		// 			UART_println(&uart2_handle, msg);
+		// 			state = 2;
+		// 		}
+		// 		break;
+		// 	case 2: //write to specified address
+		// 		spi_write(SPI1, address);
+		// 		//wait to receive a message
+		// 		int response = spi_read(SPI1);
+		// 		if (response > 0 )
+		// 		{
+		// 			char temp[100];
+		// 			sprintf(temp, "From address {%x}, received : %x", address, response);
+		// 			UART_println(&uart2_handle, temp);
+		// 			state =0;
+		// 		}
+		// 		break;
+
+		// 	default:
+		// 		break;
+		// }
 
 	}
 }

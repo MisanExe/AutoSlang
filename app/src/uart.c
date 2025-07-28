@@ -42,9 +42,8 @@ void UART_init(uint32_t uart, uart_handle_t *handle)
     usart_set_stopbits(uart, 1);
     usart_set_mode(uart, USART_MODE_TX_RX);
 
-    // add  interrupts
+    // add  interrupt on receive
     usart_enable_rx_interrupt(uart);
-    // usart_enable_tx_interrupt(USART2);
     nvic_enable_irq(uartInterruptId);
     
     usart_enable(uart);
@@ -70,6 +69,23 @@ void UART_println(uart_handle_t *handle, char *data)
 {
     UART_writeBytes(handle, data);
     UART_writeBytes(handle, "\n\r");
+}
+
+// Read uart received data from buffer 
+void UART_readRecvData(uart_handle_t *handle, char *data)
+{
+    int i = 0;
+    while(!RingBuffer_isEmpty(&uart_databuffer[handle->uartIndex]))
+    {
+        data[i] = RingBuffer_read(&uart_databuffer[handle->uartIndex]);
+        i++;
+    }
+}
+
+uint8_t UART_read(uart_handle_t *handle)
+{
+    char data = (char)RingBuffer_read(&uart_databuffer[handle->uartIndex]);
+    return data;
 }
 
 
