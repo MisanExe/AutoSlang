@@ -22,7 +22,7 @@ int main(void)
 	uart_handle_t uart2_handle;
 	UART_init(USART2, &uart2_handle);
 
-	char text[] = "I hope this works out.\n\rLost my job, on a mission to retain my dignity\n\n\r";
+	char text[] = "Testing from main\n\n\r";
 	
 	UART_writeBytes(&uart2_handle, text);
 	while(1)
