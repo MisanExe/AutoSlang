@@ -25,7 +25,8 @@ int main(void)
 	);
 
 	uart_handle_t uart2_handle;
-	UART_init(USART2, &uart2_handle);
+	UartInit(USART2, &uart2_handle);
+	LoggerInit();
 
 	int state = 0;
 	int address = 0;
@@ -38,46 +39,26 @@ int main(void)
 			__asm__("nop");
 		}
 
-		uint8_t buffer = 0;
-		buffer = UART_read(&uart2_handle);
-		if(buffer == '\r')
+
+		switch(state)
 		{
-			gpio_toggle(GPIOB, GPIO7);	
+			case 0:
+				UartPrintLn(&uart2_handle,"Enter command in terminal. e.g READ=<address>");
+				UartPrint(&uart2_handle, "Command : ");
+				state = 1;
+				break;
+			case 1: // Await response 
+				echo(&uart2_handle);
+				if(UartReadByte(&uart2_handle) == '\r')	
+				{
+					state = 2;
+				}
+				break;
+			case 2:
+				LoggerLogMsg(INFO, "Test works. Currently in state 2 of state machine");
+				state = 0;
+			default:
+				LoggerLogMsg(WARNING, "State machine in uknown state");
 		}
-
-		// switch(state)
-		// {
-		// 	case 0:
-		// 		UART_println(&uart2_handle, "Enter command. e.g READ=<address> ");
-		// 		UART_writeBytes(&uart2_handle, "COMMAND : ");
-		// 		state = 1;
-		// 		break;
-		// 	case 1: // waiting to read spi from here
-		// 		UART_readRecvData(&uart2_handle, msg);
-
-		// 		sscanf(msg, "READ=%x", &address);
-		// 		if(address > 0)
-		// 		{
-		// 			UART_println(&uart2_handle, msg);
-		// 			state = 2;
-		// 		}
-		// 		break;
-		// 	case 2: //write to specified address
-		// 		spi_write(SPI1, address);
-		// 		//wait to receive a message
-		// 		int response = spi_read(SPI1);
-		// 		if (response > 0 )
-		// 		{
-		// 			char temp[100];
-		// 			sprintf(temp, "From address {%x}, received : %x", address, response);
-		// 			UART_println(&uart2_handle, temp);
-		// 			state =0;
-		// 		}
-		// 		break;
-
-		// 	default:
-		// 		break;
-		// }
-
 	}
 }

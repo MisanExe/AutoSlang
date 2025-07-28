@@ -1,4 +1,5 @@
 #include "../inc/rtc.h"
+#include "../inc/config.h"
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/rtc.h>
 #include <libopencm3/stm32/pwr.h>
@@ -7,37 +8,41 @@
 
 static bool isInit = false;
 
-void Rtc_init(uint32_t presetCounterVal)
+void RtcInit(uint32_t presetCounterVal) // to-do : rewrite function
 {
-    if(!isInit)
-    {
-        // enable clock access to rcc pwr 
-        // and backup  
-        rcc_periph_clock_enable(RCC_PWR);
-        rcc_periph_clock_enable(RCC_BKP);
+    presetCounterVal = presetCounterVal + 1; // prevent warnings
+    #ifdef _USE_RTC
 
-        // disable write protection 
-        pwr_disable_backup_domain_write_protect();
+        if(!isInit)
+        {
+            // enable clock access to rcc pwr 
+            // and backup  
+            rcc_periph_clock_enable(RCC_PWR);
+            rcc_periph_clock_enable(RCC_BKP);
 
-        // Rtc clock settings
-        // enable Low-Speed-Internal clk
-        rcc_osc_on(RCC_LSI);
-        while(!rcc_is_osc_ready(RCC_LSI));
-        rcc_set_rtc_clock_source(RCC_LSI);
+            // disable write protection 
+            pwr_disable_backup_domain_write_protect();
 
-        // Prescaler settings :
-        // Enter config mode, set 
-        // prescaler and counter value 
-        rtc_enter_config_mode();
-        rtc_set_prescale_val(40000); // LSI is 40Khz
-        rtc_set_counter_val(presetCounterVal);
-        rtc_exit_config_mode();
-        isInit = true;
-    }
+            // Rtc clock settings
+            // enable Low-Speed-Internal clk
+            rcc_osc_on(RCC_LSI);
+            while(!rcc_is_osc_ready(RCC_LSI));
+            rcc_set_rtc_clock_source(RCC_LSI);
+
+            // Prescaler settings :
+            // Enter config mode, set 
+            // prescaler and counter value 
+            rtc_enter_config_mode();
+            rtc_set_prescale_val(40000); // LSI is 40Khz
+            rtc_set_counter_val(presetCounterVal);
+            rtc_exit_config_mode();
+            isInit = true;
+        }
+    #endif
     
 }
 
-void Rtc_setCounter(uint32_t counterValue)
+void RtcSetCounter(uint32_t counterValue)
 {
     rtc_enter_config_mode();
 	rtc_set_prescale_val(40000); // LSI is 40Khz
@@ -45,7 +50,7 @@ void Rtc_setCounter(uint32_t counterValue)
 	rtc_exit_config_mode();
 }
 
-void Rtc_getTimeStr(char *time)
+void RtcGetTimeStr(char *time)
 {
     uint32_t epoch = rtc_get_counter_val();
     int days = epoch/86400;
@@ -60,7 +65,7 @@ void Rtc_getTimeStr(char *time)
     }
 }
 
-uint32_t Rtc_getTime(void)
+uint32_t RtcGetTime(void)
 {
     return rtc_get_counter_val();
 }

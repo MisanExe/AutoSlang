@@ -30,14 +30,53 @@ typedef struct{
 }uart_handle_t;
 
 
-// Initialization and setup
-void UART_init(uint32_t uart, uart_handle_t *handle);
-// write
-void UART_write(uart_handle_t *handle, uint8_t data);
-void UART_writeBytes(uart_handle_t *handle, char *data);
-void UART_readRecvData(uart_handle_t *handle, char *data);
-void UART_println(uart_handle_t *handle, char *data);
-uint8_t UART_read(uart_handle_t *handle);
+/*
+*@brief
+*@param 
+*@return    
+*/
+void UartInit(uint32_t uart, uart_handle_t *handle);
+/*
+*@brief
+*@param 
+*@return    
+*/
+void UartWrite(uart_handle_t *handle, uint8_t data);
+/*
+*@brief
+*@param 
+*@return    
+*/
+void UartWriteBytes(uart_handle_t *handle, const char *data);
+/*
+*@brief
+*@param 
+*@return    
+*/
+void UartReceiveBytes(uart_handle_t *handle, char *data);
+/*
+*@brief
+*@param 
+*@return    
+*/
+void UartPrint(uart_handle_t *handle, const char *data);
+/*
+*@brief
+*@param 
+*@return    
+*/
+void UartPrintLn(uart_handle_t *handle, const char *data);
+/*
+*@brief
+*@param 
+*@return    
+*/
+uint8_t UartReadByte(uart_handle_t *handle);
+/*
+*@brief
+*@param 
+*@return    
+*/
 void echo(uart_handle_t *handle);
 
 

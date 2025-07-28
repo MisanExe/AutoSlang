@@ -14,9 +14,9 @@ static uint32_t _getGpioPort(uint32_t uart);
 static uint32_t _getInterruptId(uint32_t uart);
 
 static ringBufferHandle_t uart_databuffer[UART_IN_USE_MAX_INDEX];
+static ringBufferHandle_t uart_streamBuffer[UART_IN_USE_MAX_INDEX];
 
-// Configure for UART 1, 2 OR 3 only
-void UART_init(uint32_t uart, uart_handle_t *handle)
+void UartInit(uint32_t uart, uart_handle_t *handle)
 {
 
     _getSelectedUart(uart, handle);
@@ -48,31 +48,37 @@ void UART_init(uint32_t uart, uart_handle_t *handle)
     
     usart_enable(uart);
 
-    // init buffer
+    // init buffers
     RingBuffer_init(&uart_databuffer[handle->uartIndex]);
+    RingBuffer_init(&uart_streamBuffer[handle->uartIndex]);
 }
 
-// Write to
-void UART_write(uart_handle_t *handle, uint8_t data)
+void UartWrite(uart_handle_t *handle, uint8_t data)
 {   
     usart_send_blocking(handle->uart, (uint16_t )data);
 }
 
-void UART_writeBytes(uart_handle_t *handle, char *data)
+void UartWriteBytes(uart_handle_t *handle, const char *data)
 {
     for(int i = 0; i < (int)strlen(data); i++)
     {
         usart_send_blocking(handle->uart, (uint16_t)data[i]);
     }
 }
-void UART_println(uart_handle_t *handle, char *data)
+
+void UartPrint(uart_handle_t *handle, const char *data)
 {
-    UART_writeBytes(handle, data);
-    UART_writeBytes(handle, "\n\r");
+    UartWriteBytes(handle, data);
 }
 
-// Read uart received data from buffer 
-void UART_readRecvData(uart_handle_t *handle, char *data)
+void UartPrintLn(uart_handle_t *handle,const char *data)
+{
+    UartWriteBytes(handle, data);
+    UartWriteBytes(handle, "\n\r");
+}
+
+
+void UartReceiveBytes(uart_handle_t *handle, char *data)
 {
     int i = 0;
     while(!RingBuffer_isEmpty(&uart_databuffer[handle->uartIndex]))
@@ -82,7 +88,7 @@ void UART_readRecvData(uart_handle_t *handle, char *data)
     }
 }
 
-uint8_t UART_read(uart_handle_t *handle)
+uint8_t UartReadByte(uart_handle_t *handle)
 {
     char data = (char)RingBuffer_read(&uart_databuffer[handle->uartIndex]);
     return data;
@@ -91,8 +97,8 @@ uint8_t UART_read(uart_handle_t *handle)
 
 void echo(uart_handle_t *handle)
 {
-
-    char data = (char)RingBuffer_read(&uart_databuffer[handle->uartIndex]);
+    uart_streamBuffer[handle->uartIndex] = uart_databuffer[handle->uartIndex];
+    char data = (char)RingBuffer_read(&uart_streamBuffer[handle->uartIndex]);
 
     if (data != '\0')
     {

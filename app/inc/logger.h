@@ -12,8 +12,8 @@ typedef enum
     DEBUG,
 }logLevel_enum;
 
-void Logger_levelToStr(logLevel_enum level, char *levelStr);
-void Logger_init(void);
-void Logger_log(logLevel_enum level, char *msg);
+void LoggerLevelToStr(logLevel_enum level, char *levelStr);
+void LoggerInit(void);
+void LoggerLogMsg(logLevel_enum level, char *msg);
 
 #endif
